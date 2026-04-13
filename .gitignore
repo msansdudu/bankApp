@@ -39,3 +39,5 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+/bank-backend/src/main/resources/application-secret.properties
