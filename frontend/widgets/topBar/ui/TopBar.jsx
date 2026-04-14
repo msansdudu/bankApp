@@ -1,12 +1,15 @@
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '../../../shared/lib/themes/ThemeContext';
 
 export default function TopBar({ name }) {
   const { theme, isDarkMode, toggleTheme } = useTheme();
+  const navigation = useNavigation();
   const styles = createStyles(theme);
 
   const handleNotifications = () => {
+    navigation.navigate('Notifications');
   };
 
   const handleThemeToggle = () => {
@@ -14,6 +17,7 @@ export default function TopBar({ name }) {
   };
 
   const handleProfile = () => {
+    navigation.navigate('Profile');
   };
 
   return (

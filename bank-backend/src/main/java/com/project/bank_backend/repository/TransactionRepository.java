@@ -12,11 +12,11 @@ import com.project.bank_backend.model.Transaction;
 @Repository
 public interface TransactionRepository extends JpaRepository<Transaction, Long> {
 
-    @Query("SELECT t FROM Transaction t WHERE t.senderAccount.user.id = :userId "
-            + "OR t.receiverAccount.user.id = :userId ORDER BY t.timestamp DESC")
+    @Query("SELECT t FROM Transaction t WHERE t.senderAccountID.user.id = :userId "
+            + "OR t.receiverAccountID.user.id = :userId ORDER BY t.timestamp DESC")
     List<Transaction> findAllByUserId(@Param("userId") Long userId);
 
-    List<Transaction> findBySenderAccountId(Long senderAccountId);
+    List<Transaction> findBySenderAccountID(Long senderAccountID);
 
-    List<Transaction> findByReceiverAccountId(Long receiverAccountId);
+    List<Transaction> findByReceiverAccountID(Long receiverAccountID);
 }

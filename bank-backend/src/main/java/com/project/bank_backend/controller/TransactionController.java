@@ -5,6 +5,11 @@ import org.springframework.web.bind.annotation.*;
 import com.project.bank_backend.model.Transaction;
 import com.project.bank_backend.service.TransactionService;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -16,17 +21,24 @@ public class TransactionController {
     private TransactionService transactionService;
 
     public static class TransferRequest {
-        public Long senderAccountId;
-        public Long receiverAccountId;
+        @NotNull(message = "Sender account ID is required")
+        public Long senderAccountID;
+
+        @NotNull(message = "Receiver account ID is required")
+        public Long receiverAccountID;
+
+        @Positive(message = "Amount must be greater than zero")
         public BigDecimal amount;
+
+        @NotBlank(message = "Currency cannot be empty")
         public String currency;
     }
 
     @PostMapping
-    public Transaction transferMoney(@RequestBody TransferRequest request) {
+    public Transaction transferMoney(@Valid @RequestBody TransferRequest request) {
         return transactionService.transferMoney(
-                request.senderAccountId,
-                request.receiverAccountId,
+                request.senderAccountID,
+                request.receiverAccountID,
                 request.amount,
                 request.currency);
     }

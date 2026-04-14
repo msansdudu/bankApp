@@ -1,52 +1,57 @@
-import React from 'react';
-import { FlatList, StyleSheet, View, Text } from 'react-native';
-import BankCard from '../../../entitites/bankCard';
+import React, { useState, useEffect, useCallback } from 'react';
+import { FlatList, StyleSheet, View, Text, ActivityIndicator } from 'react-native';
+import BankCard from '../../../entities/bankCard';
 import { useTheme } from '../../../shared/lib/themes/ThemeContext';
+import { getAccountsByUserId } from '../../../entities/bankCard/api';
+import { useCurrentUser } from '../../../entities/user/model/UserContext';
 
-const mockCards = [
-  {
-    id: '1',
-    cardType: 'Visa',
-    cardNumber: '1234 5678 9012 3456',
-    cardOrder: 'DEBIT',
-    balance: '₽2 000',
-  },
-  {
-    id: '2',
-    cardType: 'MasterCard',
-    cardNumber: '9876 5432 1098 7654',
-    cardOrder: 'CREDIT',
-    balance: '₽23 000',
-  },
-  {
-    id: '3',
-    cardType: 'МИР',
-    cardNumber: '5555 4444 3333 2222',
-    cardOrder: 'DEBIT',
-    balance: '₽123,2',
-  },
-];
-
-export default function CardsList() {
+export default function CardsList({ refreshTrigger }) {
   const { theme } = useTheme();
   const styles = createStyles(theme);
+  const { userId } = useCurrentUser();
+
+  const [cards, setCards] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchCards = useCallback(() => {
+    getAccountsByUserId(userId)
+      .then((data) => {
+        setCards(data);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error('Failed to fetch cards:', error);
+        setLoading(false);
+      });
+  }, [userId]);
+
+  useEffect(() => {
+    fetchCards();
+  }, [fetchCards, refreshTrigger]);
+
+  if (loading) {
+    return (
+      <View style={[styles.container, styles.loaderContainer]}>
+        <ActivityIndicator size="large" color={theme.primary} />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Мои карты</Text>
       <FlatList
-        data={mockCards}
-        keyExtractor={(item) => item.id}
+        data={cards}
+        keyExtractor={(item) => item.id.toString()}
         horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.listContent}
         renderItem={({ item }) => (
           <BankCard
-            cardType={item.cardType}
-            cardNumber={item.cardNumber}
-            cardOrder={item.cardOrder}
-            balance={item.balance}
-            expiryDate={item.expiryDate}
+            cardType="Дебетовая"
+            cardNumber={item.accountNumber}
+            cardOrder="MIR"
+            balance={`${item.balance} ${item.currency}`}
             theme={theme}
           />
         )}

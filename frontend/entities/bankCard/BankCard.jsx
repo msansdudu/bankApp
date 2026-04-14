@@ -35,7 +35,9 @@ export default function BankCard({ cardType, cardNumber, cardOrder, balance, the
             <Text style={styles.cardValue}>{cardOrder}</Text>
           </View>
           <View>
-            <Text style={styles.cardNumber}>{'**' + cardNumber.split(' ')[3]}</Text>
+            <Text style={styles.cardNumber}>
+              {'***' + (cardNumber ? cardNumber.toString().slice(-4) : '****')}
+            </Text>
           </View>
         </View>
       </View>

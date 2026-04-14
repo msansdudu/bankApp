@@ -38,8 +38,8 @@ public class TransactionService {
         bankAccountRepository.save(receiver);
 
         Transaction transaction = new Transaction();
-        transaction.setSenderAccount(sender);
-        transaction.setReceiverAccount(receiver);
+        transaction.setSenderAccountID(sender);
+        transaction.setReceiverAccountID(receiver);
         transaction.setAmount(amount);
         transaction.setCurrency(currency);
         transaction.setStatus("COMPLETED");
