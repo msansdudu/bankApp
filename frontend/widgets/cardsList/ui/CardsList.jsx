@@ -48,7 +48,7 @@ export default function CardsList({ refreshTrigger }) {
         contentContainerStyle={styles.listContent}
         renderItem={({ item }) => (
           <BankCard
-            cardType="Дебетовая"
+            cardType={item.accountType}
             cardNumber={item.accountNumber}
             cardOrder="MIR"
             balance={`${item.balance} ${item.currency}`}

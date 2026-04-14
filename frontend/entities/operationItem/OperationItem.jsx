@@ -30,7 +30,7 @@ export default function OperationItem({ operationType, destination, sum, date, t
           </View>
         </View>
         <View style={styles.infoRight}>
-          <Text style={[{ textAlign: 'right' }, styles.topText ]}>{sum}</Text>
+          <Text style={[{ textAlign: 'right' }, styles.sumText ]}>{sum}</Text>
           <Text style={[{ textAlign: 'right' }, styles.bottomText]}>{date}</Text>
         </View>
       </View>
@@ -40,9 +40,7 @@ export default function OperationItem({ operationType, destination, sum, date, t
 
 const createStyles = (theme) => StyleSheet.create({
   oper: {
-    width: '100%' - 40,
-    marginLeft: 20,
-    marginRight: 20,
+    marginHorizontal: 20,
     marginBottom: 5,
     height: 70,
     borderRadius: 16,
@@ -73,7 +71,7 @@ const createStyles = (theme) => StyleSheet.create({
     flexDirection: 'column',
   },
   bottomText: {
-    color: theme.text,
+    color: theme.textSecondary,
     marginTop: '5%',
     fontSize: 12,
     fontWeight: '300',
@@ -84,6 +82,12 @@ const createStyles = (theme) => StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
     letterSpacing: 0.3,
+  },
+  sumText: {
+      color: theme.primary,
+      fontSize: 16,
+      fontWeight: '700',
+      letterSpacing: 0.3,
   }
 });
 

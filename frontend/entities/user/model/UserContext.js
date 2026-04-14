@@ -4,7 +4,7 @@ const UserContext = createContext();
 
 export const UserProvider = ({ children }) => {
   // На текущем этапе хардкодим ID: 6, позже добавим логику входа
-  const [userId, setUserId] = useState(4);
+  const [userId, setUserId] = useState(6);
 
   return (
     <UserContext.Provider value={{ userId, setUserId }}>

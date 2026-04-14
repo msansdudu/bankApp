@@ -3,6 +3,7 @@ package com.project.bank_backend.model;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
@@ -24,6 +25,9 @@ public class Notification {
 
     @Column(nullable = false)
     private Boolean isRead;
+
+    @Column
+    private BigDecimal amount;
 
     @JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY)
