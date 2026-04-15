@@ -1,37 +1,47 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { FlatList, StyleSheet, View, Text, ActivityIndicator } from 'react-native';
+import React, { useState, useCallback, useEffect } from 'react';
+import { StyleSheet, View, FlatList, ActivityIndicator, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import NotificationItem from '../../../entities/notificationItem';
 import { useTheme } from '../../../shared/lib/themes/ThemeContext';
-import { getNotificationsByUserId, markNotificationAsRead } from '../../../entities/notificationItem/api/api';
 import { useCurrentUser } from '../../../entities/user/model/UserContext';
+import { getNotificationsByUserId, markNotificationAsRead } from '../../../entities/notificationItem/api/api';
+import NotificationItem from '../../../entities/notificationItem';
 
 export default function NotificationsScreen() {
     const { theme } = useTheme();
     const styles = createStyles(theme);
-    const { userId } = useCurrentUser();
+    const { user, logout } = useCurrentUser();
 
     const [notifications, setNotifications] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    const fetchNotifications = useCallback(() => {
-        getNotificationsByUserId(userId)
-            .then((data) => {
-                setNotifications(data);
-                setLoading(false);
-            })
-            .catch((error) => {
-                console.error('Failed to fetch notifications:', error);
-                setLoading(false);
-            });
-    }, [userId]);
+    const fetchNotifications = useCallback(async () => {
+        if (!user?.id) {
+            setLoading(false);
+            return;
+        }
 
-    const handleNotificationPress = useCallback((id) => {
-        // Оптимистичное обновление
+        try {
+            const data = await getNotificationsByUserId(user.id);
+            setNotifications(data);
+        } catch (error) {
+            console.error('Failed to fetch notifications:', error);
+            // Если токен невалиден — разлогиниваем
+            if (error.response?.status === 401) logout();
+        } finally {
+            setLoading(false);
+        }
+    }, [user?.id, logout]);
+
+    const handleNotificationPress = useCallback(async (id) => {
         setNotifications(prev =>
             prev.map(n => n.id === id ? { ...n, isRead: true } : n)
         );
-        markNotificationAsRead(id).catch(err => console.error(err));
+
+        try {
+            await markNotificationAsRead(id);
+        } catch (err) {
+            console.error('Failed to mark as read:', err);
+        }
     }, []);
 
     useEffect(() => {
@@ -52,7 +62,7 @@ export default function NotificationsScreen() {
                 data={notifications}
                 keyExtractor={(item) => item.id.toString()}
                 showsVerticalScrollIndicator={false}
-                contentContainerStyle={[styles.listContent, { flexGrow: 1 }]}
+                contentContainerStyle={styles.listContent}
                 renderItem={({ item }) => (
                     <NotificationItem
                         notificationType={item.type}

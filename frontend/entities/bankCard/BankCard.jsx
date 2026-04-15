@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
-export default function BankCard({ cardType, cardNumber, cardOrder, balance, theme }) {
+export default function BankCard({ cardType, cardNumber, cardOrder, balance, theme, onPress }) {
   const [isPressed, setIsPressed] = useState(false);
   const styles = createStyles(theme);
 
@@ -11,8 +11,7 @@ export default function BankCard({ cardType, cardNumber, cardOrder, balance, the
       activeOpacity={0.6}
       onPressIn={() => setIsPressed(true)}
       onPressOut={() => setIsPressed(false)}
-      onPress={() => {
-      }}
+      onPress={onPress}
       style={[styles.card, isPressed && styles.cardPressed]}
     >
       <View style={styles.cardHeader}>

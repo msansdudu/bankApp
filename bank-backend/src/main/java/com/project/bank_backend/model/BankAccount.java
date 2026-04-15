@@ -25,7 +25,7 @@ public class BankAccount {
     private Long id;
 
     @NotBlank(message = "Account number cannot be empty")
-    @Size(min = 19, max = 19, message = "Account number must be 19 symbols")
+    @Size(min = 16, max = 16, message = "Account number must be 16 symbols")
     @Column(unique = true, nullable = false)
     private String accountNumber;
 

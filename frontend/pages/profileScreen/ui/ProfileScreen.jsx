@@ -1,22 +1,33 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import React, { useState, useEffect, useCallback } from 'react';
+import { StyleSheet, View, Text, TouchableOpacity, SafeAreaView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../../shared/lib/themes/ThemeContext';
 import { useCurrentUser } from '../../../entities/user/model/UserContext';
 import { getUserById } from '../../../entities/user/api/api';
-
 export default function ProfileScreen({ navigation }) {
   const { theme } = useTheme();
-  const { userId } = useCurrentUser();
-  const [user, setUser] = useState(null);
   const styles = createStyles(theme);
 
+  const { user: currentUser, logout } = useCurrentUser();
+  const [profileData, setProfileData] = useState(null);
+
+  const loadProfile = useCallback(async () => {
+    if (!currentUser?.id) return;
+
+    try {
+      const data = await getUserById(currentUser.id);
+      setProfileData(data);
+    } catch (err) {
+      console.error("Ошибка загрузки профиля:", err);
+      if (err.response?.status === 401) {
+        logout();
+      }
+    }
+  }, [currentUser?.id, logout]);
+
   useEffect(() => {
-    getUserById(userId)
-      .then(data => setUser(data))
-      .catch(err => console.error(err));
-  }, [userId]);
+    loadProfile();
+  }, [loadProfile]);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -24,17 +35,20 @@ export default function ProfileScreen({ navigation }) {
         <View style={styles.avatarContainer}>
           <Ionicons name="person" size={50} color={theme.primary} />
         </View>
-        <Text style={styles.name}>{user?.name || 'Загрузка...'}</Text>
-        <Text style={styles.email}>{user?.email || 'email@example.com'}</Text>
+        <Text style={styles.name}>{profileData?.name || 'Загрузка...'}</Text>
+        <Text style={styles.email}>{profileData?.email || 'email@example.com'}</Text>
       </View>
 
       <View style={styles.menu}>
         <MenuButton icon="settings-outline" title="Настройки" theme={theme} />
         <MenuButton icon="shield-checkmark-outline" title="Безопасность" theme={theme} />
         <MenuButton icon="help-circle-outline" title="Поддержка" theme={theme} />
-        
-        <TouchableOpacity style={styles.logoutButton}>
-          <Ionicons name="log-out-outline" size={24} color="#FF3B30" />
+
+        <TouchableOpacity
+          style={styles.logoutButton}
+          onPress={() => logout()}
+        >
+          <Ionicons name="log-out-outline" size={24} color={theme.error} />
           <Text style={styles.logoutText}>Выйти из аккаунта</Text>
         </TouchableOpacity>
       </View>
@@ -122,7 +136,7 @@ const createStyles = (theme) => StyleSheet.create({
     backgroundColor: theme.card,
   },
   logoutText: {
-    color: '#FF3B30',
+    color: theme.error,
     fontSize: 16,
     fontWeight: '600',
     marginLeft: 10,

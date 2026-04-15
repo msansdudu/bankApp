@@ -4,26 +4,32 @@ import BankCard from '../../../entities/bankCard';
 import { useTheme } from '../../../shared/lib/themes/ThemeContext';
 import { getAccountsByUserId } from '../../../entities/bankCard/api';
 import { useCurrentUser } from '../../../entities/user/model/UserContext';
+import { useNavigation } from '@react-navigation/native';
 
 export default function CardsList({ refreshTrigger }) {
   const { theme } = useTheme();
   const styles = createStyles(theme);
-  const { userId } = useCurrentUser();
+  const { user } = useCurrentUser();
+  const navigation = useNavigation();
 
   const [cards, setCards] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchCards = useCallback(() => {
-    getAccountsByUserId(userId)
-      .then((data) => {
-        setCards(data);
-        setLoading(false);
-      })
-      .catch((error) => {
-        console.error('Failed to fetch cards:', error);
-        setLoading(false);
-      });
-  }, [userId]);
+  const fetchCards = useCallback(async () => {
+    if (!user?.id) {
+      setLoading(false);
+      return;
+    }
+    
+    try {
+      const data = await getAccountsByUserId(user.id);
+      setCards(data);
+    } catch (error) {
+      console.error('Failed to fetch cards:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [user?.id]);
 
   useEffect(() => {
     fetchCards();
@@ -53,6 +59,7 @@ export default function CardsList({ refreshTrigger }) {
             cardOrder="MIR"
             balance={`${item.balance} ${item.currency}`}
             theme={theme}
+            onPress={() => navigation.navigate('CardDetails', { account: item })}
           />
         )}
       />

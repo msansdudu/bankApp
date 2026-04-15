@@ -31,6 +31,9 @@ public class TransactionService {
         if (sender.getBalance().compareTo(amount) < 0) {
             throw new RuntimeException("Insufficient funds");
         }
+        if (!sender.getCurrency().equals(receiver.getCurrency())) {
+            throw new RuntimeException("Currencies do not match");
+        }
         sender.setBalance(sender.getBalance().subtract(amount));
         receiver.setBalance(receiver.getBalance().add(amount));
 

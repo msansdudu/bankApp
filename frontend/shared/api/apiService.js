@@ -1,23 +1,27 @@
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_URL } from './config';
 
-export const apiRequest = async (endpoint, options = {}) => {
-    const url = `${API_URL}${endpoint}`;
+const api = axios.create({
+    baseURL: API_URL,
+    headers: {
+        'Content-Type': 'application/json',
+    },
+});
 
-    const defaultOptions = {
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        ...options,
-    };
-
-    try {
-        const response = await fetch(url, defaultOptions);
-        if (!response.ok) {
-            throw new Error(`Ошибка запроса: ${response.status}`);
+api.interceptors.request.use(
+    async (config) => {
+        const storedUser = await AsyncStorage.getItem('@user_session');
+        if (storedUser) {
+            const { token } = JSON.parse(storedUser);
+            // Автоматически добавляем токен в заголовок
+            config.headers.Authorization = `Bearer ${token}`;
         }
-        return await response.json();
-    } catch (error) {
-        console.error('API Error:', error);
-        throw error;
+        return config;
+    },
+    (error) => {
+        return Promise.reject(error);
     }
-};
+);
+
+export default api;

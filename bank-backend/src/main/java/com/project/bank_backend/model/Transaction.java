@@ -1,6 +1,8 @@
 package com.project.bank_backend.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
@@ -30,6 +32,8 @@ public class Transaction {
     @Column(nullable = false)
     private BigDecimal amount;
 
+    @NotBlank(message = "Currency cannot be empty")
+    @Size(min = 3, max = 3, message = "Currency must be 3 characters")
     @Column(nullable = false)
     private String currency; // валюта
 
@@ -43,24 +47,28 @@ public class Transaction {
     @JsonProperty("senderName")
     public String getSenderName() {
         return senderAccountID != null && senderAccountID.getUser() != null
-                ? senderAccountID.getUser().getName() : "Unknown";
+                ? senderAccountID.getUser().getName()
+                : "Unknown";
     }
 
     @JsonProperty("receiverName")
     public String getReceiverName() {
         return receiverAccountID != null && receiverAccountID.getUser() != null
-                ? receiverAccountID.getUser().getName() : "Unknown";
+                ? receiverAccountID.getUser().getName()
+                : "Unknown";
     }
 
     @JsonProperty("senderUserId")
     public Long getSenderUserId() {
         return senderAccountID != null && senderAccountID.getUser() != null
-                ? senderAccountID.getUser().getId() : null;
+                ? senderAccountID.getUser().getId()
+                : null;
     }
 
     @JsonProperty("receiverUserId")
     public Long getReceiverUserId() {
         return receiverAccountID != null && receiverAccountID.getUser() != null
-                ? receiverAccountID.getUser().getId() : null;
+                ? receiverAccountID.getUser().getId()
+                : null;
     }
 }

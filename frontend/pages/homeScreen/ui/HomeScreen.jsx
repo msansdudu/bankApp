@@ -8,32 +8,45 @@ import OperationsList from '../../../widgets/operationsList';
 import { getUserById } from '../../../entities/user/api/api';
 import { useCurrentUser } from '../../../entities/user/model/UserContext';
 
-export default function HomeScreen({ navigation }) {
+export default function HomeScreen({ navigation, route }) {
   const { theme } = useTheme();
   const styles = createStyles(theme);
-  const { userId } = useCurrentUser();
+
+  const { user: currentUser, logout } = useCurrentUser();
 
   const [refreshing, setRefreshing] = useState(false);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
-  const [user, setUser] = useState({ name: 'Загрузка...' });
+  const [userData, setUserData] = useState({ name: 'Загрузка...' });
 
-  const fetchUser = useCallback(() => {
-    getUserById(userId)
-      .then((data) => setUser(data))
-      .catch((err) => console.error('Failed to fetch user:', err));
-  }, [userId]);
+  // Автоматическое обновление при возврате после перевода
+  useEffect(() => {
+    if (route.params?.refresh) {
+      onRefresh();
+      navigation.setParams({ refresh: false });
+    }
+  }, [route.params?.refresh]);
+
+  const fetchUser = useCallback(async () => {
+    if (!currentUser?.id) return;
+
+    try {
+      const data = await getUserById(currentUser.id);
+      setUserData(data);
+    } catch (err) {
+      if (err.response?.status === 401) {
+        logout();
+      }
+      console.error("Не удалось загрузить данные профиля", err);
+    }
+  }, [currentUser?.id, logout]);
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
-    // Увеличиваем триггер, чтобы уведомить дочерние компоненты об обновлении
     setRefreshTrigger((prev) => prev + 1);
-    fetchUser();
 
-    // Имитируем окончание загрузки через небольшую задержку
-    // (виджеты сами загрузят данные, а индикатор мы скроем чуть позже)
-    setTimeout(() => {
+    fetchUser().finally(() => {
       setRefreshing(false);
-    }, 1500);
+    });
   }, [fetchUser]);
 
   useEffect(() => {
@@ -42,11 +55,16 @@ export default function HomeScreen({ navigation }) {
 
   return (
     <SafeAreaView style={styles.container}>
-      <TopBar name={user.name} />
+      <TopBar name={userData.name} />
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[theme.primary]} tintColor={theme.primary} />
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={[theme.primary]}
+            tintColor={theme.primary}
+          />
         }
       >
         <CardsList refreshTrigger={refreshTrigger} />

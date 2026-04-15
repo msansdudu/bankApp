@@ -8,22 +8,26 @@ import { useCurrentUser } from '../../../entities/user/model/UserContext';
 export default function OperationsList({ refreshTrigger }) {
   const { theme } = useTheme();
   const styles = createStyles(theme);
-  const { userId } = useCurrentUser();
+  const { user } = useCurrentUser();
 
   const [operations, setOperations] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchOperations = useCallback(() => {
-    getTransactionsByUserId(userId)
-      .then((data) => {
-        setOperations(data);
-        setLoading(false);
-      })
-      .catch((error) => {
-        console.error('Failed to fetch transactions:', error);
-        setLoading(false);
-      });
-  }, [userId]);
+  const fetchOperations = useCallback(async () => {
+    if (!user?.id) {
+      setLoading(false);
+      return;
+    }
+    
+    try {
+      const data = await getTransactionsByUserId(user.id);
+      setOperations(data);
+    } catch (error) {
+      console.error('Failed to fetch transactions:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [user?.id]);
 
   useEffect(() => {
     fetchOperations();
@@ -48,7 +52,7 @@ export default function OperationsList({ refreshTrigger }) {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.listContent}
         renderItem={({ item }) => {
-          const isSender = item.senderUserId === userId;
+          const isSender = item.senderUserId === user?.id;
           const participantName = isSender ? item.receiverName : item.senderName;
           const displaySum = isSender ? `-${item.amount}` : `+${item.amount}`;
 
