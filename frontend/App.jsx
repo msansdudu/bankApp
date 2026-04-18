@@ -10,6 +10,7 @@ import LoginScreen from './pages/loginScreen';
 import RegisterScreen from './pages/registerScreen';
 import CardDetailsScreen from './pages/cardDetailsScreen/ui/CardDetailsScreen';
 import TransferScreen from './pages/transferScreen/ui/TransferScreen';
+import CreateAccountScreen from './pages/createAccountScreen/ui/CreateAccountScreen';
 import { useCurrentUser } from './entities/user/model/UserContext';
 import { ActivityIndicator, View, StatusBar } from 'react-native';
 
@@ -32,6 +33,7 @@ function MainNavigator() {
       <Stack.Screen name="Notifications" component={NotificationsScreen} options={{ title: 'Уведомления' }} />
       <Stack.Screen name="CardDetails" component={CardDetailsScreen} options={{ title: 'Карта' }} />
       <Stack.Screen name="TransferMoney" component={TransferScreen} options={{ title: 'Перевод' }} />
+      <Stack.Screen name="CreateAccount" component={CreateAccountScreen} options={{ title: 'Новый счет' }} />
     </Stack.Navigator>
   );
 }

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { FlatList, StyleSheet, View, Text, ActivityIndicator } from 'react-native';
+import { FlatList, StyleSheet, View, Text, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import BankCard from '../../../entities/bankCard';
 import { useTheme } from '../../../shared/lib/themes/ThemeContext';
 import { getAccountsByUserId } from '../../../entities/bankCard/api';
@@ -20,10 +21,10 @@ export default function CardsList({ refreshTrigger }) {
       setLoading(false);
       return;
     }
-    
+
     try {
       const data = await getAccountsByUserId(user.id);
-      setCards(data);
+      setCards([...data, { id: 'add-btn', isAddButton: true }]);
     } catch (error) {
       console.error('Failed to fetch cards:', error);
     } finally {
@@ -52,16 +53,29 @@ export default function CardsList({ refreshTrigger }) {
         horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.listContent}
-        renderItem={({ item }) => (
-          <BankCard
-            cardType={item.accountType}
-            cardNumber={item.accountNumber}
-            cardOrder="MIR"
-            balance={`${item.balance} ${item.currency}`}
-            theme={theme}
-            onPress={() => navigation.navigate('CardDetails', { account: item })}
-          />
-        )}
+        renderItem={({ item }) => {
+          if (item.isAddButton) {
+            return (
+              <TouchableOpacity
+                style={styles.addCardButton}
+                onPress={() => navigation.navigate('CreateAccount')}
+              >
+                <Ionicons name="add-circle-outline" size={48} color={theme.primary} />
+                <Text style={styles.addCardText}>Добавить счет</Text>
+              </TouchableOpacity>
+            );
+          }
+          return (
+            <BankCard
+              cardType={item.accountType}
+              cardNumber={item.accountNumber}
+              cardOrder="MIR"
+              balance={`${item.balance} ${item.currency}`}
+              theme={theme}
+              onPress={() => navigation.navigate('CardDetails', { account: item })}
+            />
+          );
+        }}
       />
     </View>
   );
@@ -82,5 +96,28 @@ const createStyles = (theme) =>
     listContent: {
       paddingHorizontal: 20,
       paddingVertical: 20,
+    },
+    addCardButton: {
+      width: 220,
+      height: 130,
+      marginRight: 16,
+      borderRadius: 16,
+      backgroundColor: theme.surface,
+      borderWidth: 2,
+      borderColor: theme.outline,
+      borderStyle: 'dashed',
+      justifyContent: 'center',
+      alignItems: 'center',
+      shadowColor: theme.textSecondary,
+      shadowOffset: { width: 0, height: 0 },
+      shadowOpacity: 0.1,
+      shadowRadius: 5,
+      elevation: 3,
+    },
+    addCardText: {
+      marginTop: 10,
+      fontSize: 16,
+      fontWeight: '600',
+      color: theme.primary,
     },
   });

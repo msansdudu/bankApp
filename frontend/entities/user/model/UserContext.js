@@ -1,5 +1,6 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { registerLogoutCallback } from '../../../shared/api/apiService';
 
 const STORAGE_KEY = '@user_session';
 
@@ -29,6 +30,11 @@ export const UserProvider = ({ children }) => {
     };
     loadStorageData();
   }, []);
+
+  // Регистрируем коллбэк для логаута при ошибках авторизации (401/403)
+  useEffect(() => {
+    registerLogoutCallback(logout);
+  }, [logout]);
 
   const login = async (userData) => {
     const normalizedUser = {

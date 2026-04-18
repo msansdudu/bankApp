@@ -20,5 +20,15 @@ export const getAccountByNumber = async (accountNumber) => {
     }
 };
 
+export const createAccount = async (data) => {
+    try {
+        const response = await api.post('/accounts/create-random', data);
+        return response.data;
+    } catch (error) {
+        console.error('Ошибка при создании счета:', error.response?.data || error.message);
+        throw error;
+    }
+};
+
 // TODO создание счета:
 // export const createAccount = (data) => apiRequest('/accounts/create', { method: 'POST', body: JSON.stringify(data) });

@@ -9,17 +9,33 @@ const api = axios.create({
     },
 });
 
+let logoutCallback = null;
+
+export const registerLogoutCallback = (callback) => {
+    logoutCallback = callback;
+};
+
 api.interceptors.request.use(
     async (config) => {
         const storedUser = await AsyncStorage.getItem('@user_session');
         if (storedUser) {
             const { token } = JSON.parse(storedUser);
-            // Автоматически добавляем токен в заголовок
             config.headers.Authorization = `Bearer ${token}`;
         }
         return config;
     },
-    (error) => {
+    (error) => Promise.reject(error)
+);
+
+api.interceptors.response.use(
+    (response) => response,
+    async (error) => {
+        if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+            console.warn('Авторизация просрочена или отсутствует. Выход из системы...');
+            if (logoutCallback) {
+                await logoutCallback();
+            }
+        }
         return Promise.reject(error);
     }
 );
